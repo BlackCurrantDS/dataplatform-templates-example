@@ -42,7 +42,7 @@ from pyspark.sql.functions import col, current_timestamp
 # -------------------------
 dbutils.widgets.text("env", "dev", "Environment")
 dbutils.widgets.text("logger_name", "dynamic_multi_source_gold", "Logger Name")
-dbutils.widgets.text("config_path", "/Workspace/configs/dynamic_sources.yaml", "Config Path")
+dbutils.widgets.text("config_path", "configs/dynamic_sources.yaml", "Config Path")
 dbutils.widgets.text("run_dbt", "false", "Run Gold Layer dbt models?")
 
 env = dbutils.widgets.get("env")
