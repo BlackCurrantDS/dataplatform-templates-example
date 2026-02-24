@@ -10,6 +10,8 @@ jobs:
   deploy-dlt-dbt:
     runs-on: ubuntu-latest
 
+    environment: ${{ github.ref == 'refs/heads/dev' && 'dev' || 'prod' }}
+
     # Common environment variables
     env:
       DBT_PROFILES_DIR: ./dbt_project/profiles/
