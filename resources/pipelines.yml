@@ -8,6 +8,8 @@ resources:
       schema: ${var.schema}
       continuous: false
       libraries:
+        - glob:
+            include: ../shared_modules/**
         - file:
             path: ../notebooks/templates/00_standard_dlt_template.py
       configuration:
