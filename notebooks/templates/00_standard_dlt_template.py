@@ -30,6 +30,9 @@ repo_root = os.path.dirname(notebook_dir)
 if repo_root not in sys.path:
     sys.path.append(repo_root)
 
+# Build absolute path to the config file in configs/
+default_config_path = os.path.join(repo_root, "configs", "dynamic_sources.yaml")
+
 
 import dlt
 import yaml
@@ -54,6 +57,11 @@ logger = utils.get_logger(logger_name)
 # -------------------------
 # 2️⃣ Load configuration
 # -------------------------
+# If the widget value is relative, resolve it relative to repo_root
+if not os.path.isabs(config_path):
+    config_path = os.path.join(repo_root, config_path)
+else:
+    config_path = config_path
 with open(config_path, "r") as f:
     config = yaml.safe_load(f)[env]
 
