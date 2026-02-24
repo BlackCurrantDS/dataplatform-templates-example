@@ -1,7 +1,7 @@
 resources:
   jobs:
     run_dlt_pipeline:
-      name: "Run DLT Pipeline"
+      name: "run_dlt_pipeline"
       trigger:
         # Run this job every day, exactly one day from the last run; see https://docs.databricks.com/api/workspace/jobs/create#trigger
         periodic:
@@ -42,7 +42,7 @@ resources:
               - "dbt run --target=${bundle.target}"
               - "dbt docs generate --target ${bundle.target} --static"
           depends_on:
-            - task_key: dynamic_multi_source_dlt
+            - task_key: run_dlt_pipeline
 
       environments:
         - environment_key: default
