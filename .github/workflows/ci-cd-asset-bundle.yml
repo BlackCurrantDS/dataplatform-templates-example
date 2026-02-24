@@ -13,7 +13,7 @@ jobs:
     # Common environment variables
     env:
       DBT_PROFILES_DIR: ./dbt_project/profiles/
-      DBT_PROJECT_DIR: ./dataplatform-templates-example
+      DBT_PROJECT_DIR: ./dataplatform-templates-example/dbt_project
 
       # Dev
       DATABRICKS_HOST_DEV: ${{ secrets.DATABRICKS_HOST_CLI }}

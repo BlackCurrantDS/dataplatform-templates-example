@@ -3,9 +3,8 @@ resources:
     dbt_sql_job:
       name: dbt_sql_job
 
-      trigger:
+      #trigger:
         # Run this job every day, exactly one day from the last run; see https://docs.databricks.com/api/workspace/jobs/create#trigger
-        manual: true
         #periodic:
         #  interval: 1
         #  unit: DAYS
@@ -26,18 +25,8 @@ resources:
               - "dbt debug --target=${bundle.target}"
               - "dbt run --target=${bundle.target}"
               - "dbt docs generate --target ${bundle.target} --static"
-            depends_on:
-              - task_key: dynamic_multi_source_dlt
-        - task_key: copy_docs_to_dbfs
           depends_on:
-            - task_key: dbt
-          environment_key: default
-          notebook_task:
-            notebook_path: ../scripts/get_artifacts_cli.ipynb
-            base_parameters:
-              SOURCE_PATH: target/
-              DEST_PATH: /dbfs/mnt/dbt_docs/dbt_sql_job/
-              TASK_KEY: dbt
+            - task_key: dynamic_multi_source_dlt
 
       environments:
         - environment_key: default
