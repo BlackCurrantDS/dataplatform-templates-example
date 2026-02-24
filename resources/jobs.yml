@@ -42,7 +42,7 @@ resources:
               - "dbt run --target=${bundle.target}"
               - "dbt docs generate --target ${bundle.target} --static"
           depends_on:
-            - task_key: run_dlt_pipeline
+            - task_key: run_dlt
 
       environments:
         - environment_key: default
