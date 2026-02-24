@@ -8,16 +8,25 @@
 # AUTHOR:   Data Platform Engineering Team
 # VERSION:  1.0
 # ============================================================
-import sys, os
-try:
-    # grab the workspace path of this notebook and derive the package location
-    nb_path = dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
-    pkg_dir = os.path.dirname(nb_path).rstrip("/") + "/shared_modules"
-    # the local filesystem equivalent is `/Workspace` prefix
-    sys.path.append("/Workspace" + pkg_dir)
-except Exception:
-    # fallback for local runs or tests
-    sys.path.append(os.path.join(os.getcwd(), "notebooks", "shared_modules"))
+import sys
+import os
+
+# Determine notebook directory
+if "__file__" in globals():
+    # Running as a plain .py file
+    notebook_dir = os.path.dirname(os.path.abspath(__file__))
+else:
+    # Databricks notebook environment
+    notebook_dir = os.getcwd()
+
+# If your structure is repo-root/notebooks/..., repo root is parent of notebooks
+repo_root = os.path.dirname(notebook_dir)
+
+# Add repo root to sys.path so 'shared_modules' package is found
+if repo_root not in sys.path:
+    sys.path.append(repo_root)
+
+from shared_modules.common_utils import some_function
 # -------------------------
 # 🔧 1. Setup
 # -------------------------
