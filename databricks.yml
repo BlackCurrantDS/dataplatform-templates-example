@@ -22,8 +22,6 @@ include:
 
 # Define variables to make the bundle environment-aware
 variables:
-  databricks_host:
-    description: "Databricks workspace host (set per target)"
   catalog:
     description: "Unity Catalog catalog name for tables"
     default: "main"
