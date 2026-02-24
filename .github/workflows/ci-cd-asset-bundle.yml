@@ -47,11 +47,11 @@ jobs:
 
       - name: Validate Asset Bundle
         run: |
-          databricks bundle validate --target $DATABRICKS_BUNDLE_TARGET
+          databricks bundle validate --target DATABRICKS_BUNDLE_TARGET
 
       - name: Deploy Asset Bundle
         run: |
-          databricks bundle deploy --target $DATABRICKS_BUNDLE_TARGET
+          databricks bundle deploy --target DATABRICKS_BUNDLE_TARGET
 
       # Optional: trigger DLT / dbt job immediately
       # - name: Run Pipeline Job
