@@ -1,21 +1,5 @@
 resources:
   jobs:
-    run_dlt_pipeline:
-      name: "run_dlt_pipeline"
-      trigger:
-        # Run this job every day, exactly one day from the last run; see https://docs.databricks.com/api/workspace/jobs/create#trigger
-        periodic:
-          interval: 1
-          unit: DAYS
-      email_notifications:
-        on_failure:
-          - bhardwaj.priyamvada30@gmail.com
-      tasks:
-        - task_key: run_dlt
-          pipeline_task:
-            pipeline_id: ${resources.pipelines.dynamic_multi_source_dlt.id}
-            full_refresh: false    # or true if you want to refresh
-    
     dbt_sql_job:
       name: dbt_sql_job
 
@@ -30,6 +14,10 @@ resources:
           - bhardwaj.priyamvada30@gmail.com
 
       tasks:
+        - task_key: run_dlt
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.dynamic_multi_source_dlt.id}
+            full_refresh: false    # or true if you want to refresh
         - task_key: dbt
           environment_key: default
           dbt_task:
