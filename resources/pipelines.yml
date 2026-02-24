@@ -9,7 +9,7 @@ resources:
       continuous: false
       libraries:
         - file:
-            include: ../notebooks/templates/00_standard_dlt_template.py
+            path: ../notebooks/templates/00_standard_dlt_template.py
       configuration:
         env: ${bundle.target}
         logger_name: dynamic_multi_source_gold
