@@ -10,9 +10,28 @@ jobs:
   deploy-dlt-dbt:
     runs-on: ubuntu-latest
 
+    # Common environment variables
     env:
       DBT_PROFILES_DIR: ./dbt_project/profiles/
       DBT_PROJECT_DIR: ./dataplatform-templates-example
+
+      # Dev
+      DATABRICKS_HOST_DEV: ${{ secrets.DATABRICKS_HOST_CLI }}
+      DATABRICKS_CLIENT_ID_DEV: ${{ secrets.DATABRICKS_CLIENT_ID_CLI }}
+      DATABRICKS_CLIENT_SECRET_DEV: ${{ secrets.DATABRICKS_TOKEN_CLI }}
+      DATABRICKS_BUNDLE_TARGET_DEV: dev
+
+      # Prod
+      DATABRICKS_HOST_PROD: ${{ secrets.DATABRICKS_HOST_CLI_PROD }}
+      DATABRICKS_CLIENT_ID_PROD: ${{ secrets.DATABRICKS_CLIENT_ID_CLI_PROD }}
+      DATABRICKS_CLIENT_SECRET_PROD: ${{ secrets.DATABRICKS_TOKEN_CLI_PROD }}
+      DATABRICKS_BUNDLE_TARGET_PROD: prod
+
+      # Set target dynamically based on branch
+      DATABRICKS_HOST: ${{ github.ref == 'refs/heads/dev' && secrets.DATABRICKS_HOST_CLI || secrets.DATABRICKS_HOST_CLI_PROD }}
+      DATABRICKS_CLIENT_ID: ${{ github.ref == 'refs/heads/dev' && secrets.DATABRICKS_CLIENT_ID_CLI || secrets.DATABRICKS_CLIENT_ID_CLI_PROD }}
+      DATABRICKS_CLIENT_SECRET: ${{ github.ref == 'refs/heads/dev' && secrets.DATABRICKS_TOKEN_CLI || secrets.DATABRICKS_TOKEN_CLI_PROD }}
+      DATABRICKS_BUNDLE_TARGET: ${{ github.ref == 'refs/heads/dev' && 'dev' || 'prod' }}
 
     steps:
       - name: Checkout repository
@@ -26,34 +45,10 @@ jobs:
       - name: Install Databricks CLI
         uses: databricks/setup-cli@main
 
-      - name: Set Databricks credentials based on branch
-        run: |
-          if [ "${GITHUB_REF##*/}" == "dev" ]; then
-            echo "Deploying to DEV environment"
-            export DATABRICKS_HOST="${{ secrets.DATABRICKS_HOST_CLI }}"
-            export DATABRICKS_CLIENT_ID="${{ secrets.DATABRICKS_CLIENT_ID_CLI }}"
-            export DATABRICKS_CLIENT_SECRET="${{ secrets.DATABRICKS_TOKEN_CLI }}"
-            export DATABRICKS_BUNDLE_TARGET="dev"
-          elif [ "${GITHUB_REF##*/}" == "main" ]; then
-            echo "Deploying to PROD environment"
-            export DATABRICKS_HOST="${{ secrets.DATABRICKS_HOST_CLI_PROD }}"
-            export DATABRICKS_CLIENT_ID="${{ secrets.DATABRICKS_CLIENT_ID_CLI_PROD }}"
-            export DATABRICKS_CLIENT_SECRET="${{ secrets.DATABRICKS_TOKEN_CLI_PROD }}"
-            export DATABRICKS_BUNDLE_TARGET="prod"
-          else
-            echo "Branch not configured for deployment, skipping."
-            exit 0
-          fi
-
       - name: Validate Asset Bundle
         run: |
-          databricks bundle validate --target DATABRICKS_BUNDLE_TARGET
+          databricks bundle validate --target $DATABRICKS_BUNDLE_TARGET
 
       - name: Deploy Asset Bundle
         run: |
-          databricks bundle deploy --target DATABRICKS_BUNDLE_TARGET
-
-      # Optional: trigger DLT / dbt job immediately
-      # - name: Run Pipeline Job
-      #   run: |
-      #     databricks bundle run <pipeline_name> --target $DATABRICKS_BUNDLE_TARGET
+          databricks bundle deploy --target $DATABRICKS_BUNDLE_TARGET
