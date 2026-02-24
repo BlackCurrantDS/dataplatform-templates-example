@@ -19,8 +19,11 @@ include:
   # Include all resource definitions (pipelines, notebooks, jobs, etc.)
   - resources/*.yml
   - resources/*/*.yml
-  # make sure python helper modules and notebooks are uploaded
-  - notebooks/**
+
+# synchronize additional filesystem items (non-YAML/JSON) such as helper modules
+sync:
+  include:
+    - notebooks/**
 
 # Define variables to make the bundle environment-aware
 variables:
