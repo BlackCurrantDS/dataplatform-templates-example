@@ -11,14 +11,28 @@
 bundle:
   name: my-dbt-dlt-bundle
 
-#run_as:
+run_as:
   # Use a service principal for CI/CD deployments
-#  service_principal_name: e1798786-5e76-4f16-a7c3-56b17bdb8166
+  service_principal_name: e1798786-5e76-4f16-a7c3-56b17bdb8166
 
 include:
   # Include all resource definitions (pipelines, notebooks, jobs, etc.)
   - resources/*.yml
   - resources/*/*.yml
+
+# Define variables to make the bundle environment-aware
+variables:
+  databricks_host:
+    description: "Databricks workspace host (set per target)"
+  catalog:
+    description: "Unity Catalog catalog name for tables"
+    default: "main"
+  schema:
+    description: "Unity Catalog schema (database) name for tables"
+    default: "events"
+  source_raw_table:
+    description: "Raw input table for the DLT pipeline"
+    default: "raw_events"
 
 # -------------------------------
 # Environment-specific targets
@@ -32,6 +46,10 @@ targets:
     workspace:
       host: https://dbc-a1581223-795d.cloud.databricks.com/    # Databricks workspace URL
       root_path: "~/dbt_bundle/dev"             # Dev-specific root folder
+    variables:
+      catalog: dev_catalog
+      schema: events_dev
+      source_raw_table: dev_raw.events
 
   prod:
     # Production mode deploys actual resources, schedules active

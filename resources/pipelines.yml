@@ -2,32 +2,20 @@ resources:
   pipelines:
     dynamic_multi_source_dlt:
       name: dynamic_multi_source_dlt
-      description: "DLT pipeline for Bronze/Silver ingestion with GE validation"
+      allow_duplicate_names: false
+      serverless: true
       continuous: false
-      development: true
-      photon: true
       libraries:
         - notebook:
-            path: ../notebooks/templates/03_dynamic_dlt_gold_template.py
-
-      # Use existing cluster instead of creating a new one
-      cluster:
-        existing_cluster_id: "<YOUR_EXISTING_CLUSTER_ID>"  # replace with your free-tier cluster ID
-
+            path: ../notebooks/templates/00_standard_dlt_template.py
       configuration:
         env: ${bundle.target}
         logger_name: dynamic_multi_source_gold
         config_path: ../configs/dynamic_sources.yaml
+        catalog: ${var.catalog}
+        schema: ${var.schema}
 
-      schedule:
-        quartz_cron_expression: "0 0 * * * ?"
-        timezone_id: "UTC"
-
-      email_notifications:
-        on_failure:
-          - bhardwaj.priyamvada30@gmail.com
-
-      environments:
+      environment:
         - environment_key: default
           spec:
             environment_version: "4"
