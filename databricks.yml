@@ -45,8 +45,8 @@ targets:
       host: https://dbc-a1581223-795d.cloud.databricks.com/    # Databricks workspace URL
       root_path: "~/dbt_bundle/dev"             # Dev-specific root folder
     variables:
-      catalog: dev_catalog
-      schema: events_dev
+      catalog: dev_catalog_dlt
+      schema: dlt_test
       source_raw_table: dev_raw.events
 
   prod:
