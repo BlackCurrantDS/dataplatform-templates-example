@@ -9,6 +9,20 @@
 # - Optional Gold layer using dbt models
 # ============================================================
 
+# make the `shared_modules` directory importable when the notebook is deployed
+# via an asset bundle. bundles only push the files to the workspace, they are not
+# automatically added to Python's sys.path, so we have to do it manually.
+import sys, os
+try:
+    # grab the workspace path of this notebook and derive the package location
+    nb_path = dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()
+    pkg_dir = os.path.dirname(nb_path).rstrip("/") + "/shared_modules"
+    # the local filesystem equivalent is `/Workspace` prefix
+    sys.path.append("/Workspace" + pkg_dir)
+except Exception:
+    # fallback for local runs or tests
+    sys.path.append(os.path.join(os.getcwd(), "notebooks", "shared_modules"))
+
 import dlt
 import yaml
 from shared_modules import pipeline_utils as utils

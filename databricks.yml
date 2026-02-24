@@ -19,6 +19,8 @@ include:
   # Include all resource definitions (pipelines, notebooks, jobs, etc.)
   - resources/*.yml
   - resources/*/*.yml
+  # make sure python helper modules and notebooks are uploaded
+  - notebooks/**
 
 # Define variables to make the bundle environment-aware
 variables:
