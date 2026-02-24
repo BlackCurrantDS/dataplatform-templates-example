@@ -28,9 +28,9 @@ jobs:
       DATABRICKS_BUNDLE_TARGET_PROD: prod
 
       # Set target dynamically based on branch
-      DATABRICKS_HOST: ${{ github.ref == 'refs/heads/dev' && secrets.DATABRICKS_HOST_CLI || secrets.DATABRICKS_HOST_CLI_PROD }}
-      DATABRICKS_CLIENT_ID: ${{ github.ref == 'refs/heads/dev' && secrets.DATABRICKS_CLIENT_ID_CLI || secrets.DATABRICKS_CLIENT_ID_CLI_PROD }}
-      DATABRICKS_CLIENT_SECRET: ${{ github.ref == 'refs/heads/dev' && secrets.DATABRICKS_TOKEN_CLI || secrets.DATABRICKS_TOKEN_CLI_PROD }}
+      DATABRICKS_HOST: ${{ github.ref == 'refs/heads/dev' && secrets.DATABRICKS_HOST_CLI  }}
+      DATABRICKS_CLIENT_ID: ${{ github.ref == 'refs/heads/dev' && secrets.DATABRICKS_CLIENT_ID_CLI }}
+      DATABRICKS_CLIENT_SECRET: ${{ github.ref == 'refs/heads/dev' && secrets.DATABRICKS_TOKEN_CLI }}
       DATABRICKS_BUNDLE_TARGET: ${{ github.ref == 'refs/heads/dev' && 'dev' || 'prod' }}
 
     steps:
