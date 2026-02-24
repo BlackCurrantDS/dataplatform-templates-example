@@ -1,0 +1,4 @@
+data_source_url: "https://api-dev.example.com/orders"
+storage_path: "/mnt/dev/bronze/sales_orders"
+target_table: "dev_bronze.sales_orders"
+alert_channel: "slack://dev-alerts"

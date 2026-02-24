@@ -1,0 +1,45 @@
+# Base contract - single source of truth
+dataset: sales_orders
+owner: data.team@example.com
+description: Sales orders from POS & ecommerce
+version: 1.0
+
+schema:
+  - name: order_id
+    type: string
+    required: true
+    unique: true
+  - name: order_date
+    type: timestamp
+    required: true
+  - name: total_amount
+    type: double
+    required: true
+    expectations:
+      - min: 0
+  - name: currency
+    type: string
+    required: true
+    allowed_values: ["USD", "EUR", "GBP"]
+
+freshness:
+  expected_frequency: daily
+  max_lag_minutes: 240
+
+quality_rules:
+  - name: valid_currency
+    expression: currency in ("USD","EUR","GBP")
+  - name: non_negative_amount
+    expression: total_amount >= 0
+
+lineage:
+  upstream: ["redshift.sales_orders","api.orders"]
+  downstream: ["silver.sales_orders","gold.orders_summary"]
+
+operational:
+  partition_columns: ["order_date"]
+  vacuum:
+    retention_hours: 168  # 7 days
+    frequency: daily
+  analyze:
+    frequency: daily

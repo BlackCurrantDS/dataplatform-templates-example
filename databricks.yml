@@ -1,0 +1,41 @@
+# ==========================================
+# Databricks Asset Bundle Configuration
+# Supports Dev & Prod environments
+# Best practices:
+# - Dev and Prod separation
+# - Service principal deployment
+# - Workspace isolation
+# - Environment-specific mode and paths
+# ==========================================
+
+bundle:
+  name: my-dbt-dlt-bundle
+
+run_as:
+  # Use a service principal for CI/CD deployments
+  service_principal_name: ae1798786-5e76-4f16-a7c3-56b17bdb8166c
+
+include:
+  # Include all resource definitions (pipelines, notebooks, jobs, etc.)
+  - resources/*.yml
+  - resources/*/*.yml
+
+# -------------------------------
+# Environment-specific targets
+# -------------------------------
+targets:
+
+  dev:
+    # Development mode ensures resources are isolated, schedules paused
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-a1581223-795d.cloud.databricks.com/    # Databricks workspace URL
+      root_path: "~/dbt_bundle/dev"             # Dev-specific root folder
+
+  prod:
+    # Production mode deploys actual resources, schedules active
+    mode: production
+    workspace:
+      host: https://dbc.cloud.databricks.com/    # Databricks workspace URL
+      root_path: "~/dbt_bundle/prod"           # Prod-specific root folder

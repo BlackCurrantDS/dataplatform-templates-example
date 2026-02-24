@@ -1,0 +1,47 @@
+resources:
+  jobs:
+    dbt_sql_job:
+      name: dbt_sql_job
+
+      trigger:
+        # Run this job every day, exactly one day from the last run; see https://docs.databricks.com/api/workspace/jobs/create#trigger
+        manual: true
+        #periodic:
+        #  interval: 1
+        #  unit: DAYS
+
+      email_notifications:
+        on_failure:
+          - bhardwaj.priyamvada30@gmail.com
+
+      tasks:
+        - task_key: dbt
+          environment_key: default
+          dbt_task:
+            project_directory: ../
+            # The default schema, catalog, etc. are defined in ../dbt_profiles/profiles.yml
+            profiles_directory: dbt_profiles/
+            commands:
+              # The dbt commands to run (see also dbt_profiles/profiles.yml; dev_schema is used in the dev profile)
+              - "dbt debug --target=${bundle.target}"
+              - "dbt run --target=${bundle.target}"
+              - "dbt docs generate --target ${bundle.target} --static"
+            depends_on:
+              - task_key: dynamic_multi_source_dlt
+        - task_key: copy_docs_to_dbfs
+          depends_on:
+            - task_key: dbt
+          environment_key: default
+          notebook_task:
+            notebook_path: ../scripts/get_artifacts_cli.ipynb
+            base_parameters:
+              SOURCE_PATH: target/
+              DEST_PATH: /dbfs/mnt/dbt_docs/dbt_sql_job/
+              TASK_KEY: dbt
+
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - dbt-databricks>=1.8.0,<2.0.0

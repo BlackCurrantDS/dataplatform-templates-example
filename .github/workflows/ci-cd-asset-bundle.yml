@@ -1,0 +1,59 @@
+name: DLT & DBT CI/CD with Asset Bundles
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  deploy-dlt-dbt:
+    runs-on: ubuntu-latest
+
+    env:
+      DBT_PROFILES_DIR: ./dbt_project/profiles/
+      DBT_PROJECT_DIR: ./dataplatform-templates-example
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Set Databricks credentials based on branch
+        run: |
+          if [ "${GITHUB_REF##*/}" == "dev" ]; then
+            echo "Deploying to DEV environment"
+            export DATABRICKS_HOST="${{ secrets.DATABRICKS_HOST_CLI }}"
+            export DATABRICKS_CLIENT_ID="${{ secrets.DATABRICKS_CLIENT_ID_CLI }}"
+            export DATABRICKS_CLIENT_SECRET="${{ secrets.DATABRICKS_TOKEN_CLI }}"
+            export DATABRICKS_BUNDLE_TARGET="dev"
+          elif [ "${GITHUB_REF##*/}" == "main" ]; then
+            echo "Deploying to PROD environment"
+            export DATABRICKS_HOST="${{ secrets.DATABRICKS_HOST_CLI_PROD }}"
+            export DATABRICKS_CLIENT_ID="${{ secrets.DATABRICKS_CLIENT_ID_CLI_PROD }}"
+            export DATABRICKS_CLIENT_SECRET="${{ secrets.DATABRICKS_TOKEN_CLI_PROD }}"
+            export DATABRICKS_BUNDLE_TARGET="prod"
+          else
+            echo "Branch not configured for deployment, skipping."
+            exit 0
+          fi
+
+      - name: Validate Asset Bundle
+        run: |
+          databricks bundle validate --target $DATABRICKS_BUNDLE_TARGET
+
+      - name: Deploy Asset Bundle
+        run: |
+          databricks bundle deploy --target $DATABRICKS_BUNDLE_TARGET
+
+      # Optional: trigger DLT / dbt job immediately
+      # - name: Run Pipeline Job
+      #   run: |
+      #     databricks bundle run <pipeline_name> --target $DATABRICKS_BUNDLE_TARGET

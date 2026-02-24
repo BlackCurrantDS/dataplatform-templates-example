@@ -1,0 +1,15 @@
+dev:
+  alert_channel: "https://hooks.slack.com/services/XXX/YYY/ZZZ"
+  sources:
+    - name: sales_api
+      type: api
+      data_source_url: "https://api-dev.example.com/orders"
+      contract_path: "/Workspace/contracts/sales_orders_contract.yaml"
+    - name: sales_redshift
+      type: redshift
+      s3_unload_path: "s3a://my-bucket/unload/redshift/sales_orders/"
+      contract_path: "/Workspace/contracts/sales_orders_contract.yaml"
+    - name: product_s3
+      type: s3
+      input_path: "s3a://my-bucket/raw/products/"
+      contract_path: "/Workspace/contracts/product_contract.yaml"

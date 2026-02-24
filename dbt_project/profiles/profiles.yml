@@ -1,0 +1,13 @@
+db_asset_bundle_sample:
+  target: dev
+  outputs:
+    dev:
+      type: databricks
+      catalog: workspace
+      schema: dbt_test
+      auth_type: oauth
+      host: "{{ env_var('DATABRICKS_HOST') }}"
+      client_id: "{{ env_var('DATABRICKS_CLIENT_ID') }}"
+      http_path: "{{ env_var('DATABRICKS_HTTP_PATH') }}"
+      client_secret: "{{ env_var('DATABRICKS_CLIENT_SECRET') }}"
+      threads: 4
