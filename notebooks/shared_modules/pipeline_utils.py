@@ -11,6 +11,7 @@ from datetime import datetime
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, lit
 import great_expectations as gx
+from pyspark.sql import DataFrame
 
 spark = SparkSession.builder.getOrCreate()
 

@@ -26,7 +26,6 @@ repo_root = os.path.dirname(notebook_dir)
 if repo_root not in sys.path:
     sys.path.append(repo_root)
 
-from shared_modules.common_utils import some_function
 # -------------------------
 # 🔧 1. Setup
 # -------------------------
