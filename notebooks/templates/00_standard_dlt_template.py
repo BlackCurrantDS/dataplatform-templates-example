@@ -35,7 +35,7 @@ import dlt
 import yaml
 from shared_modules import pipeline_utils as utils
 from pyspark.sql.functions import col, current_timestamp
-from shared_modules.dbt_utils import run_dbt_models  # assume you have reusable dbt run utils
+#from shared_modules.dbt_utils import run_dbt_models  # assume you have reusable dbt run utils
 
 # -------------------------
 # 1️⃣ Notebook parameters
@@ -131,6 +131,7 @@ for src in sources:
 # -------------------------
 # 5️⃣ Gold Layer - dbt Models (Optional)
 # -------------------------
+"""
 if run_dbt_flag:
     try:
         dbt_targets = [src['name'] for src in sources]  # or define specific Gold models
@@ -139,7 +140,7 @@ if run_dbt_flag:
     except Exception as e:
         logger.error(f"Gold layer dbt run failed: {str(e)}")
         utils.send_alert(alert_channel, "🚨 Gold layer dbt run failed", logger)
-
+"""
 # -------------------------
 # 6️⃣ Central Monitoring
 # -------------------------
