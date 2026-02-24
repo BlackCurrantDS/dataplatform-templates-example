@@ -8,8 +8,8 @@ resources:
       schema: ${var.schema}
       continuous: false
       libraries:
-        - glob:
-            include: ../notebooks/**
+        - file:
+            include: ../notebooks/templates/00_standard_dlt_template.py
       configuration:
         env: ${bundle.target}
         logger_name: dynamic_multi_source_gold
