@@ -11,9 +11,9 @@
 bundle:
   name: my-dbt-dlt-bundle
 
-run_as:
+#run_as:
   # Use a service principal for CI/CD deployments
-  service_principal_name: e1798786-5e76-4f16-a7c3-56b17bdb8166
+#  service_principal_name: e1798786-5e76-4f16-a7c3-56b17bdb8166
 
 include:
   # Include all resource definitions (pipelines, notebooks, jobs, etc.)
