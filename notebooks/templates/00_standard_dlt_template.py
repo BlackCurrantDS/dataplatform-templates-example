@@ -24,14 +24,17 @@ else:
     notebook_dir = os.getcwd()
 
 # If your structure is repo-root/notebooks/..., repo root is parent of notebooks
-repo_root = os.path.dirname(notebook_dir)
+notebook_root = os.path.dirname(notebook_dir)   # <repo-root>/notebook
+repo_root = os.path.dirname(notebook_root)      # <repo-root>
 
-# Add repo root to sys.path so 'shared_modules' package is found
-if repo_root not in sys.path:
-    sys.path.append(repo_root)
+# 1) Make shared_modules importable
+shared_modules_path = os.path.join(notebook_root, "shared_modules")
+if shared_modules_path not in sys.path:
+    sys.path.append(shared_modules_path)
 
-# Build absolute path to the config file in configs/
-default_config_path = os.path.join(repo_root, "configs", "dynamic_sources.yaml")
+# 2) Resolve config path relative to repo root
+default_config_relative = os.path.join("configs", "dynamic_sources.yaml")
+default_config_path = os.path.join(repo_root, default_config_relative)
 
 
 import dlt
@@ -45,7 +48,7 @@ from pyspark.sql.functions import col, current_timestamp
 # -------------------------
 dbutils.widgets.text("env", "dev", "Environment")
 dbutils.widgets.text("logger_name", "dynamic_multi_source_gold", "Logger Name")
-dbutils.widgets.text("config_path", "configs/dynamic_sources.yaml", "Config Path")
+dbutils.widgets.text("config_path", default_config_relative, "Config Path")
 dbutils.widgets.text("run_dbt", "false", "Run Gold Layer dbt models?")
 
 env = dbutils.widgets.get("env")
@@ -58,10 +61,12 @@ logger = utils.get_logger(logger_name)
 # 2️⃣ Load configuration
 # -------------------------
 # If the widget value is relative, resolve it relative to repo_root
-if not os.path.isabs(config_path):
-    config_path = os.path.join(repo_root, config_path)
+config_path_widget = dbutils.widgets.get("config_path")
+# If widget gives a relative path, resolve it from repo_root
+if not os.path.isabs(config_path_widget):
+    config_path = os.path.join(repo_root, config_path_widget)
 else:
-    config_path = config_path
+    config_path = config_path_widget
 with open(config_path, "r") as f:
     config = yaml.safe_load(f)[env]
 
