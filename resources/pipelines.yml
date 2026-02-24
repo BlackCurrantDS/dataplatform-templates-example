@@ -6,7 +6,7 @@ resources:
       serverless: true
       continuous: false
       libraries:
-        - notebook:
+        - file:
             path: ../notebooks/templates/00_standard_dlt_template.py
       configuration:
         env: ${bundle.target}
