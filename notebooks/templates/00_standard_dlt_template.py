@@ -14,6 +14,7 @@
 # automatically added to Python's sys.path, so we have to do it manually.
 import sys
 import os
+from pyspark.sql import types as T
 
 # Determine notebook directory
 if "__file__" in globals():
@@ -107,6 +108,8 @@ for src in sources:
         @dlt.table(name=f"{src_config['name']}_silver", comment=f"Silver table for {src_config['name']}")
         @dlt.expect_or_drop("non_null_order_date", "order_date IS NOT NULL")
         def silver():
+            # make sure validation is always defined
+            validation = {"success": False, "results": []}
             try:
                 df_raw = dlt.read(f"{src_config['name']}_bronze")
                 df_clean = df_raw.dropDuplicates()
@@ -131,7 +134,7 @@ for src in sources:
                 return df_clean
             except Exception as e:
                 utils.log_to_monitoring(dataset=src_config['name'], env=env, status="FAILED",
-                                        rows_written=0, validation_success=False,
+                                        rows_written=0, validation_success=validation.get("success", False),
                                         failed_expectations=len(validation.get("results", [])),
                                         error_message=str(e))
                 utils.send_alert(alert_channel, f"🚨 Silver pipeline failed for {src_config['name']}", logger)
@@ -155,16 +158,69 @@ if run_dbt_flag:
 # -------------------------
 # 6️⃣ Central Monitoring
 # -------------------------
+from pyspark.sql import types as T
+
 @dlt.table(name=f"{logger_name}_pipeline_monitoring", comment="Central monitoring table")
 def monitoring():
-    try:
-        for src in sources:
-            rows_written = dlt.read(f"{src['name']}_silver").count()
-            utils.log_to_monitoring(dataset=src['name'], env=env, status="SUCCESS",
-                                    rows_written=rows_written, validation_success=True,
-                                    failed_expectations=0)
-        logger.info("📊 All source pipelines logged to central monitoring table")
-        return dlt.read(f"{sources[0]['name']}_silver").limit(0)
-    except Exception as e:
-        logger.error(f"Monitoring table failed: {str(e)}")
-        return dlt.read(f"{sources[0]['name']}_silver").limit(0)
+    # We'll accumulate a list of dicts, one per source
+    records = []
+
+    for src in sources:
+        dataset_name = src['name']
+        silver_table_name = f"{dataset_name}_silver"
+
+        try:
+            df_silver = dlt.read(silver_table_name)
+            rows_written = df_silver.count()
+
+            utils.log_to_monitoring(
+                dataset=dataset_name,
+                env=env,
+                status="SUCCESS",
+                rows_written=rows_written,
+                validation_success=True,
+                failed_expectations=0
+            )
+
+            records.append({
+                "dataset": dataset_name,
+                "status": "SUCCESS",
+                "rows_written": rows_written,
+                "error_message": None
+            })
+
+        except Exception as e:
+            # If DLT can't resolve/read the silver table, don't fail the whole monitoring table
+            logger.error(f"Monitoring failed for {silver_table_name}: {str(e)}")
+
+            utils.log_to_monitoring(
+                dataset=dataset_name,
+                env=env,
+                status="FAILED",
+                rows_written=0,
+                validation_success=False,
+                failed_expectations=0,
+                error_message=str(e)
+            )
+
+            records.append({
+                "dataset": dataset_name,
+                "status": "FAILED",
+                "rows_written": 0,
+                "error_message": str(e)
+            })
+
+    # Define a schema for the monitoring table
+    schema = T.StructType([
+        T.StructField("dataset", T.StringType(), nullable=False),
+        T.StructField("status", T.StringType(), nullable=False),
+        T.StructField("rows_written", T.LongType(), nullable=False),
+        T.StructField("error_message", T.StringType(), nullable=True),
+    ])
+
+    # Create a DataFrame from the list of dicts
+    if records:
+        return spark.createDataFrame(records, schema=schema)
+    else:
+        # If no sources, return an empty DF with the same schema
+        return spark.createDataFrame([], schema=schema)
